@@ -1,0 +1,189 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "schemaVersion": 39,
+  "version": 1,
+  "title": "Asobi",
+  "tags": ["asobi", "game-backend"],
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "",
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {"type": "row", "title": "Connections & sessions", "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}, "id": 100, "collapsed": false, "panels": []},
+    {
+      "type": "timeseries", "title": "WS connects / min",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 1}, "id": 1,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum(rate(asobi_ws_connected_total[$__rate_interval])) * 60", "legendFormat": "connected", "refId": "A"},
+        {"expr": "sum(rate(asobi_ws_disconnected_total[$__rate_interval])) * 60", "legendFormat": "disconnected", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries", "title": "WS messages / min by type",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 1}, "id": 2,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum by (type) (rate(asobi_ws_message_in_total[$__rate_interval])) * 60", "legendFormat": "in: {{type}}", "refId": "A"},
+        {"expr": "sum by (type) (rate(asobi_ws_message_out_total[$__rate_interval])) * 60", "legendFormat": "out: {{type}}", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries", "title": "Session duration (seconds)",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 1}, "id": 3,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [
+        {"expr": "histogram_quantile(0.5, sum(rate(asobi_session_duration_seconds_bucket[$__rate_interval])) by (le))", "legendFormat": "p50", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum(rate(asobi_session_duration_seconds_bucket[$__rate_interval])) by (le))", "legendFormat": "p95", "refId": "B"}
+      ]
+    },
+    {"type": "row", "title": "Matches & worlds", "gridPos": {"h": 1, "w": 24, "x": 0, "y": 9}, "id": 101, "collapsed": false, "panels": []},
+    {
+      "type": "timeseries", "title": "Matches started/finished / min by mode",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 10}, "id": 4,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum by (mode) (rate(asobi_match_started_total[$__rate_interval])) * 60", "legendFormat": "started: {{mode}}", "refId": "A"},
+        {"expr": "sum(rate(asobi_match_finished_total[$__rate_interval])) * 60", "legendFormat": "finished", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries", "title": "Worlds started/finished / min by mode",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 10}, "id": 5,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum by (mode) (rate(asobi_world_started_total[$__rate_interval])) * 60", "legendFormat": "started: {{mode}}", "refId": "A"},
+        {"expr": "sum(rate(asobi_world_finished_total[$__rate_interval])) * 60", "legendFormat": "finished", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries", "title": "Match duration (seconds)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18}, "id": 6,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [
+        {"expr": "histogram_quantile(0.5, sum(rate(asobi_match_duration_seconds_bucket[$__rate_interval])) by (le))", "legendFormat": "p50", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum(rate(asobi_match_duration_seconds_bucket[$__rate_interval])) by (le))", "legendFormat": "p95", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries", "title": "World phase changes / min",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 18}, "id": 7,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "sum by (from_phase, to_phase) (rate(asobi_world_phase_changed_total[$__rate_interval])) * 60", "legendFormat": "{{from_phase}} -> {{to_phase}}", "refId": "A"}]
+    },
+    {"type": "row", "title": "Matchmaker", "gridPos": {"h": 1, "w": 24, "x": 0, "y": 26}, "id": 102, "collapsed": false, "panels": []},
+    {
+      "type": "timeseries", "title": "Queued/formed/failed / min by mode",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 27}, "id": 8,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum by (mode) (rate(asobi_matchmaker_queued_total[$__rate_interval])) * 60", "legendFormat": "queued: {{mode}}", "refId": "A"},
+        {"expr": "sum by (mode) (rate(asobi_matchmaker_formed_total[$__rate_interval])) * 60", "legendFormat": "formed: {{mode}}", "refId": "B"},
+        {"expr": "sum by (mode) (rate(asobi_matchmaker_failed_total[$__rate_interval])) * 60", "legendFormat": "failed: {{mode}}", "refId": "C"}
+      ]
+    },
+    {
+      "type": "timeseries", "title": "Matchmaker wait (seconds)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 27}, "id": 9,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [
+        {"expr": "histogram_quantile(0.5, sum(rate(asobi_matchmaker_wait_seconds_bucket[$__rate_interval])) by (le))", "legendFormat": "p50", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum(rate(asobi_matchmaker_wait_seconds_bucket[$__rate_interval])) by (le))", "legendFormat": "p95", "refId": "B"}
+      ]
+    },
+    {"type": "row", "title": "Errors & anticheat", "gridPos": {"h": 1, "w": 24, "x": 0, "y": 35}, "id": 103, "collapsed": false, "panels": []},
+    {
+      "type": "stat", "title": "Errors / min",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 36}, "id": 10,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 10}]}}},
+      "targets": [{"expr": "sum(rate(asobi_errors_total[5m])) * 60", "refId": "A"}],
+      "options": {"colorMode": "value", "graphMode": "area", "textMode": "auto"}
+    },
+    {
+      "type": "stat", "title": "Anticheat violations / min",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 36}, "id": 11,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 10}]}}},
+      "targets": [{"expr": "sum(rate(asobi_anticheat_violations_total[5m])) * 60", "refId": "A"}],
+      "options": {"colorMode": "value", "graphMode": "area", "textMode": "auto"}
+    },
+    {
+      "type": "timeseries", "title": "Errors / min by kind",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 40}, "id": 12,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "sum by (kind) (rate(asobi_errors_total[$__rate_interval])) * 60", "legendFormat": "{{kind}}", "refId": "A"}]
+    },
+    {
+      "type": "timeseries", "title": "Rate-limit rejections / min",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 40}, "id": 13,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum(rate(asobi_ws_connect_rate_limited_total[$__rate_interval])) * 60", "legendFormat": "ws_connect", "refId": "A"},
+        {"expr": "sum(rate(asobi_join_rate_limited_total[$__rate_interval])) * 60", "legendFormat": "join", "refId": "B"},
+        {"expr": "sum(rate(asobi_rehome_rate_limited_total[$__rate_interval])) * 60", "legendFormat": "rehome", "refId": "C"},
+        {"expr": "sum(rate(asobi_ws_idle_auth_timeout_total[$__rate_interval])) * 60", "legendFormat": "idle_auth_timeout", "refId": "D"},
+        {"expr": "sum(rate(asobi_ws_origin_rejected_total[$__rate_interval])) * 60", "legendFormat": "origin_rejected", "refId": "E"}
+      ]
+    },
+    {"type": "row", "title": "Economy, chat & voting", "gridPos": {"h": 1, "w": 24, "x": 0, "y": 48}, "id": 104, "collapsed": false, "panels": []},
+    {
+      "type": "timeseries", "title": "Transactions & purchases / min",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 49}, "id": 14,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum by (currency) (rate(asobi_economy_transactions_total[$__rate_interval])) * 60", "legendFormat": "txn: {{currency}}", "refId": "A"},
+        {"expr": "sum(rate(asobi_store_purchases_total[$__rate_interval])) * 60", "legendFormat": "purchases", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries", "title": "Chat messages / min",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 49}, "id": 15,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "sum(rate(asobi_chat_messages_total[$__rate_interval])) * 60", "legendFormat": "messages", "refId": "A"}]
+    },
+    {
+      "type": "timeseries", "title": "Votes started/cast/resolved / min",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 49}, "id": 16,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [
+        {"expr": "sum by (method) (rate(asobi_vote_started_total[$__rate_interval])) * 60", "legendFormat": "started: {{method}}", "refId": "A"},
+        {"expr": "sum(rate(asobi_vote_cast_total[$__rate_interval])) * 60", "legendFormat": "cast", "refId": "B"},
+        {"expr": "sum(rate(asobi_vote_resolved_total[$__rate_interval])) * 60", "legendFormat": "resolved", "refId": "C"}
+      ]
+    },
+    {"type": "row", "title": "Auth cache", "gridPos": {"h": 1, "w": 24, "x": 0, "y": 57}, "id": 105, "collapsed": false, "panels": []},
+    {
+      "type": "timeseries", "title": "Auth cache hit rate",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 58}, "id": 17,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"unit": "percentunit"}},
+      "targets": [{"expr": "sum(rate(asobi_auth_cache_hits_total[$__rate_interval])) / clamp_min(sum(rate(asobi_auth_cache_hits_total[$__rate_interval])) + sum(rate(asobi_auth_cache_misses_total[$__rate_interval])), 1)", "legendFormat": "hit rate", "refId": "A"}]
+    },
+    {
+      "type": "timeseries", "title": "Auth cache sweeps / min",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 58}, "id": 18,
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "targets": [{"expr": "sum(rate(asobi_auth_cache_sweeps_total[$__rate_interval])) * 60", "legendFormat": "sweeps", "refId": "A"}]
+    }
+  ]
+}

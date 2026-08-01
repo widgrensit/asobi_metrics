@@ -1,0 +1,18 @@
+{application, asobi_metrics, [
+    {description, "Prometheus metrics collectors and Grafana dashboard for asobi"},
+    {vsn, "git"},
+    {registered, [asobi_metrics_sup]},
+    {mod, {asobi_metrics_app, []}},
+    {applications, [
+        kernel,
+        stdlib,
+        telemetry,
+        prometheus
+    ]},
+    {env, [
+        {auto_setup, true}
+    ]},
+    {modules, []},
+    {licenses, ["Apache-2.0"]},
+    {links, [{"GitHub", "https://github.com/widgrensit/asobi_metrics"}]}
+]}.
